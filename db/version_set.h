@@ -1163,6 +1163,11 @@ class VersionSet {
     last_sequence_.store(s, std::memory_order_release);
   }
 
+  uint64_t GetManifestUpdateSequence() const {
+    return manifest_update_sequence_.load(std::memory_order_relaxed);
+  }
+  std::string GetReplicationSequence() const { return replication_sequence_; }
+
   // Note: memory_order_release must be sufficient
   void SetLastPublishedSequence(uint64_t s) {
     assert(s >= last_published_sequence_);
@@ -1437,6 +1442,9 @@ class VersionSet {
 
   // generates a increasing version number for every new version
   uint64_t current_version_number_;
+
+  std::atomic<uint64_t> manifest_update_sequence_{0};
+  std::string replication_sequence_;
 
   // Queue of writers to the manifest file
   std::deque<ManifestWriter*> manifest_writers_;
