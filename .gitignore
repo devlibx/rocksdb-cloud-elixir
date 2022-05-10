@@ -1,5 +1,5 @@
 make_config.mk
-
+sdk_build
 *.a
 *.arc
 *.d

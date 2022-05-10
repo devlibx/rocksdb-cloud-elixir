@@ -778,6 +778,22 @@ set(SOURCES
         utilities/ttl/db_ttl_impl.cc
         utilities/write_batch_with_index/write_batch_with_index.cc
         utilities/write_batch_with_index/write_batch_with_index_internal.cc
+        cloud/aws/aws_env.cc
+        cloud/aws/aws_kafka.cc
+        cloud/aws/aws_kinesis.cc
+        cloud/aws/aws_retry.cc
+        cloud/aws/aws_s3.cc
+        cloud/db_cloud_impl.cc
+        cloud/cloud_env.cc
+        cloud/cloud_env_impl.cc
+        cloud/cloud_env_options.cc
+        cloud/cloud_log_controller.cc
+        cloud/manifest_reader.cc
+        cloud/purge.cc
+        cloud/cloud_manifest.cc
+        cloud/cloud_scheduler.cc
+        cloud/cloud_storage_provider.cc
+        db/db_impl/db_impl_remote_compaction.cc
         $<TARGET_OBJECTS:build_version>)
 
 if(HAVE_SSE42 AND NOT MSVC)
@@ -840,7 +856,7 @@ endif()
 set(ROCKSDB_STATIC_LIB rocksdb${ARTIFACT_SUFFIX})
 set(ROCKSDB_SHARED_LIB rocksdb-shared${ARTIFACT_SUFFIX})
 
-option(ROCKSDB_BUILD_SHARED "Build shared versions of the RocksDB libraries" ON)
+option(ROCKSDB_BUILD_SHARED "Build shared versions of the RocksDB libraries" OFF)
 
 option(WITH_LIBRADOS "Build with librados" OFF)
 if(WITH_LIBRADOS)
@@ -890,11 +906,10 @@ endif()
 
 option(WITH_JNI "build with JNI" OFF)
 # Tests are excluded from Release builds
-CMAKE_DEPENDENT_OPTION(WITH_TESTS "build with tests" ON
-  "CMAKE_BUILD_TYPE STREQUAL Debug" OFF)
-option(WITH_BENCHMARK_TOOLS "build with benchmarks" ON)
+CMAKE_DEPENDENT_OPTION(WITH_TESTS "build with tests" OFF "CMAKE_BUILD_TYPE STREQUAL Debug" OFF)
+option(WITH_BENCHMARK_TOOLS "build with benchmarks" OFF)
 option(WITH_CORE_TOOLS "build with ldb and sst_dump" ON)
-option(WITH_TOOLS "build with tools" ON)
+option(WITH_TOOLS "build with tools" OFF)
 
 if(WITH_TESTS OR WITH_BENCHMARK_TOOLS OR WITH_TOOLS OR WITH_JNI OR JNI)
   include_directories(SYSTEM ${PROJECT_SOURCE_DIR}/third-party/gtest-1.8.1/fused-src)
@@ -1263,3 +1278,5 @@ if(WITH_TOOLS)
   add_custom_target(tools
     DEPENDS ${tool_deps})
 endif()
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -DUSE_AWS=1 -DUSE_RTTI=1 -DROCKSDB_USE_RTTI  -Wno-inconsistent-missing-override -Wno-shorten-64-to-32 -Wno-error -Wno-deprecated-declarations -Wno-error -Wno-range-loop-analysis ")
