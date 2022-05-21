@@ -3,8 +3,12 @@ FROM ubuntu:22.10
 RUN apt-get update
 RUN apt-get install -y git
 RUN apt-get -y install cmake
-RUN apt-get -y install librdkafka-dev
+RUN apt-get -y install librdkafka-dev libboost-all-dev
 RUN cmake --version
+
+# For OSX
+# brew install librdkafka
+# brew install boost
 
 RUN mkdir /src
 
@@ -30,15 +34,22 @@ RUN git clone https://github.com/jbeder/yaml-cpp.git
 RUN cd /src/yaml-cpp
 RUN mkdir /src/yaml-cpp/build
 
-
 WORKDIR /src/aws-sdk-cpp/build
 RUN cmake .. -DBUILD_ONLY="s3;kinesis" -DBUILD_SHARED_LIBS=off -DENABLE_TESTING=off -DAUTORUN_UNIT_TESTS=off
-RUN make install -j 12
-
-WORKDIR /src/rocksdb-cloud-elixir/sdk_build
-RUN UAS_AWS=1 USE_KAFKA=1  cmake ..  -DWITH_GFLAGS=off
 RUN make install -j 12
 
 WORKDIR /src/yaml-cpp/build
 RUN cmake .. 
 RUN make install -j 12
+
+WORKDIR /src/cppkafka/build
+RUN cmake .. -DCPPKAFKA_BUILD_SHARED=off
+RUN make install -j 12
+
+#   FOR OSX Build
+#   UAS_AWS=1 USE_KAFKA=1  cmake ..  -DWITH_GFLAGS=off -DCMAKE_CXX_FLAGS="-I/usr/local/include"
+WORKDIR /src/rocksdb-cloud-elixir/sdk_build
+RUN UAS_AWS=1 USE_KAFKA=1  cmake ..  -DWITH_GFLAGS=off
+RUN make install -j 12
+
+
